@@ -3,3 +3,4 @@ tabula-py
 google-generativeai
 flask
 firebase-admin
+flask-cors

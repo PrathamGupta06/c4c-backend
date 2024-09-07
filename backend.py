@@ -4,7 +4,9 @@ from werkzeug.utils import secure_filename
 import firebase_admin
 from firebase_admin import credentials, firestore
 from helper import extract_statement_details
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 
 # Configuration
 UPLOAD_FOLDER = 'uploads/'
@@ -56,6 +58,38 @@ def upload_statement_pdf():
         return jsonify({"message": "Statement uploaded and processed successfully!", "data": statement_details}), 201
 
     return jsonify({"error": "File type not allowed"}), 400
+
+@app.route('/get_statements', methods=['GET'])
+def get_statements():
+    try:
+        # Retrieve all documents from the 'statements' collection
+        statements_ref = db.collection('statements')
+        docs = statements_ref.stream()
+
+        # Create a list to store formatted statement data
+        statements_list = []
+
+        for doc in docs:
+            data = doc.to_dict()
+
+            # Format the data in the required format
+            formatted_statement = {
+                "date": data.get("date", ""),
+                "narration": data.get("narration", ""),
+                "withdrawal amount": data.get("withdrawal_amount", ""),
+                "deposit amount": data.get("deposit_amount", ""),
+                "closing balance": data.get("closing_balance", "")
+            }
+
+            # Append formatted statement to the list
+            statements_list.append(formatted_statement)
+
+        # Return the list of statements in JSON format
+        return jsonify(statements_list), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
