@@ -3,7 +3,7 @@ import os
 from werkzeug.utils import secure_filename
 import firebase_admin
 from firebase_admin import credentials, firestore
-from helper import extract_statement_details
+from helper import extract_statement_details, answer_query
 from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
@@ -19,7 +19,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate('./serviceAccountKey.json')  # Update this path
-firebase_admin.initialize_app(cred)
+# firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Function to check if file type is allowed
@@ -76,9 +76,12 @@ def get_statements():
             formatted_statement = {
                 "date": data.get("date", ""),
                 "narration": data.get("narration", ""),
-                "withdrawal amount": data.get("withdrawal_amount", ""),
-                "deposit amount": data.get("deposit_amount", ""),
-                "closing balance": data.get("closing_balance", "")
+                "withdrawal_amount": data.get("withdrawal_amount", ""),
+                "deposit_amount": data.get("deposit_amount", ""),
+                "closing_balance": data.get("closing_balance", ""),
+                "payment_method": data.get("payment_method", ""),
+                "category": data.get("category", ""),
+                "classification": data.get("classification", "")
             }
 
             # Append formatted statement to the list
@@ -90,6 +93,12 @@ def get_statements():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    query = data.get('query', '')
+    response = answer_query(query)
+    return jsonify({"response": response}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
