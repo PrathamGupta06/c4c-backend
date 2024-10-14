@@ -119,7 +119,7 @@ def dashboard():
     necessary_categories = ['Educational', 'Groceries', 'Medical']
     variable_categories = ['Travel', 'Transfers', 'Others']
 
-    expense_segmentation = [{'data': [0,0,0]} for _ in range(12)]
+    expense_segmentation = [{'data': [0 for _ in range(12)]} for _ in range(3)]
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
     for statement in statements:
@@ -130,11 +130,11 @@ def dashboard():
         if not withdrawal_amount:
             continue
         if category in fixed_categories:
-            expense_segmentation[month-1]['data'][0] += float(withdrawal_amount.replace(",", ""))
+            expense_segmentation[0]['data'][month-1] += float(withdrawal_amount.replace(",", ""))
         elif category in necessary_categories:
-            expense_segmentation[month-1]['data'][1] += float(withdrawal_amount.replace(",", ""))
+            expense_segmentation[1]['data'][month-1] += float(withdrawal_amount.replace(",", ""))
         elif category in variable_categories:
-            expense_segmentation[month-1]['data'][2] += float(withdrawal_amount.replace(",", ""))
+            expense_segmentation[2]['data'][month-1] += float(withdrawal_amount.replace(",", ""))
 
     # account_balance_over_time_y= [0 for _ in range(len(statements))]
     # account_balance_over_time_x = [0 for _ in range(len(statements))]
