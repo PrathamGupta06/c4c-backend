@@ -93,6 +93,64 @@ def get_statements():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/dashboard', methods=['GET'])
+def dashboard():
+    statements = get_statements().get_json()
+
+    expenditure_category_data = {}
+    for statement in statements:
+        category = statement["category"]
+        withdrawal_amount = statement["withdrawal_amount"]
+        if not withdrawal_amount:
+            continue
+        
+        if category in expenditure_category_data:
+            expenditure_category_data[category] += float(withdrawal_amount.replace(",", ""))
+        else:
+            expenditure_category_data[category] = float(withdrawal_amount.replace(",", ""))
+        
+    payment_methods_data = {}
+    for statement in statements:
+        payment_method = statement["payment_method"]
+        payment_methods_data[payment_method] = payment_methods_data.get(payment_method, 0) + 1
+
+    fixed_categories = ['Bills and Recharges', 'Medical']
+    necessary_categories = ['Educational', 'Groceries', 'Medical']
+    variable_categories = ['Travel', 'Transfers', 'Others']
+
+    expense_segmentation = [{'data': [0,0,0]} for _ in range(12)]
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    for statement in statements:
+        date = statement["date"]
+        month = int(date.split("/")[1])
+        category = statement["category"]
+        withdrawal_amount = statement["withdrawal_amount"]
+        if not withdrawal_amount:
+            continue
+        if category in fixed_categories:
+            expense_segmentation[month-1]['data'][0] += float(withdrawal_amount.replace(",", ""))
+        elif category in necessary_categories:
+            expense_segmentation[month-1]['data'][1] += float(withdrawal_amount.replace(",", ""))
+        elif category in variable_categories:
+            expense_segmentation[month-1]['data'][2] += float(withdrawal_amount.replace(",", ""))
+
+    # account_balance_over_time_y= [0 for _ in range(len(statements))]
+    # account_balance_over_time_x = [0 for _ in range(len(statements))]
+    # for statement in statements:
+    #     date = statement["date"]
+    #     month = int(date.split("/")[1])
+    #     closing_balance = statement["closing_balance"]
+    #     account_balance_over_time_y[month-1] = float(closing_balance.replace(",", ""))
+
+    return jsonify({
+        "expenditure_category_data": expenditure_category_data,
+        "payment_methods_data": payment_methods_data,
+        "expense_segmentation": expense_segmentation,
+        # "account_balance_over_time": account_balance_over_time
+    }), 200
+
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
