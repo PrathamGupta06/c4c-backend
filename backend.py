@@ -93,6 +93,21 @@ def get_statements():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/delete_statments', methods=['DELETE'])
+def delete_statements():
+    try:
+        # Retrieve all documents from the 'statements' collection
+        statements_ref = db.collection('statements')
+        docs = statements_ref.stream()
+
+        # Delete all documents in the collection
+        for doc in docs:
+            doc.reference.delete()
+
+        return jsonify({"message": "All statements deleted successfully!"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
