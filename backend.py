@@ -111,7 +111,7 @@ def delete_statements():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    statements = get_statements().get_json()
+    statements = get_statements()[0].get_json()
 
     expenditure_category_data = {}
     for statement in statements:
